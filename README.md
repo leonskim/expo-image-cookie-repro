@@ -2,6 +2,8 @@
 
 Reproduction repository: [leonskim/expo-image-cookie-repro](https://github.com/leonskim/expo-image-cookie-repro).
 
+Upstream fix: [expo/expo#52473](https://github.com/expo/expo/pull/52473).
+
 Standalone adaptation of [alessbelli/test-expo-image-cookies](https://github.com/alessbelli/test-expo-image-cookies), originally linked from [expo/expo#43229](https://github.com/expo/expo/issues/43229).
 
 Pins Expo 58.0.21, expo-image 58.0.18, React Native 0.88.1, and React 19.3.0. A local Node server replaces the external worker so results do not depend on a deployed service or credentials.
