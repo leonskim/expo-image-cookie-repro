@@ -1,0 +1,44 @@
+{
+  "testedAt": "2026-10-28T21:52:16.748Z",
+  "device": {
+    "platform": "android",
+    "serial": "emulator-5554",
+    "apiLevel": 36,
+    "architecture": "arm64-v8a"
+  },
+  "versions": {
+    "expo": "58.0.21",
+    "expo-image": "58.0.18",
+    "react": "19.3.0",
+    "react-native": "0.88.1"
+  },
+  "appSourceUnchanged": true,
+  "appSourceSHA256": "ac6fbd4533eeba98a51a6eb7afaa414d9710f3582d721ca8412876f9a6d71308",
+  "patchSHA256": "8789a672626832ab3fd8ad2679fe4cb7cb18a6fe9bdaa4280d37c85dff1f4dcd",
+  "before": {
+    "run": "1793224216484",
+    "imageStatus": 401,
+    "imageCookie": "",
+    "screenshot": "before.png",
+    "nativeSourceSHA256": "f28ad32346d9f40d853e93dedde35cdf14d5ab98dbf2d0d3c1c2d8d9046e2130",
+    "build": "BUILD SUCCESSFUL in 5m 32s"
+  },
+  "after": {
+    "run": "1793224274981",
+    "imageStatus": 200,
+    "imageCookie": "demo_session=valid",
+    "screenshot": "after.png",
+    "nativeSourceSHA256": "f90a1c15b1305ae07df38a944aaa09782625b0257bd0358dc652a377244faba9",
+    "build": "BUILD SUCCESSFUL in 5s"
+  },
+  "fixtureTest": {
+    "command": "npm test",
+    "passed": true
+  },
+  "workspaceState": "expo-image in node_modules is patched; npm ci or npm run patch:revert restores unpatched source",
+  "sourceLabels": [
+    "android-emulator-5554",
+    "local-cookie-fixture",
+    "argent-before-after-captures"
+  ]
+}

@@ -1,19 +1,26 @@
 {
-  "name": "test-expo-image-cookies",
+  "name": "expo-image-cookie-repro",
   "version": "1.0.0",
+  "private": true,
   "main": "index.js",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
+    "start": "expo start --port 8093 --localhost",
+    "server": "node server.mjs",
+    "test": "node --test server.test.mjs",
+    "android:prebuild": "expo prebuild --platform android --no-install",
+    "android:build": "./android/gradlew -p android :app:assembleDebug -PreactNativeDevServerPort=8093 -PreactNativeArchitectures=arm64-v8a --console=plain",
+    "patch:apply": "git apply --directory=node_modules/expo-image patches/expo-image-cookie.patch",
+    "patch:revert": "git apply --reverse --directory=node_modules/expo-image patches/expo-image-cookie.patch"
   },
   "dependencies": {
-    "expo": "~54.0.33",
-    "expo-image": "^3.0.11",
-    "expo-status-bar": "~3.0.9",
-    "react": "19.1.0",
-    "react-native": "0.81.5"
+    "expo": "58.0.21",
+    "expo-image": "58.0.18",
+    "react": "19.3.0",
+    "react-native": "0.88.1"
   },
-  "private": true
+  "expo": {
+    "autolinking": {
+      "android": { "buildFromSource": ["expo-image"] }
+    }
+  }
 }

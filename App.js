@@ -1,103 +1,106 @@
-import { useState, useEffect, useMemo } from 'react';
-import { StatusBar } from 'expo-status-bar';
+import { useEffect, useState } from 'react';
 import { Image } from 'expo-image';
-import { Dimensions, StyleSheet, Text, View, ScrollView } from 'react-native';
+import { Pressable, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { dependencies } from './package.json';
 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-const IMAGE_HEIGHT = SCREEN_HEIGHT * 0.3;
-const IMAGE_TOP = SCREEN_HEIGHT * 0.2;
-
-const IMAGE_URI = 'https://lively-sea-c0cb.aless-jeant.workers.dev/image.svg';
-const JSON_URI = 'https://lively-sea-c0cb.aless-jeant.workers.dev/json';
+const SERVER = 'http://127.0.0.1:4317';
 
 export default function App() {
-  const [jsonRaw, setJsonRaw] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const imageUri = useMemo(
-    () => `${IMAGE_URI}?t=${Date.now()}`,
-    []
-  );
+  const [run, setRun] = useState(null);
+  const [error, setError] = useState('');
 
-  useEffect(() => {
-    fetch(JSON_URI)
-      .then((res) => res.text())
-      .then((text) => {
-        setJsonRaw(text);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, []);
+  async function start() {
+    setError('');
+    setRun(null);
+    try {
+      const id = String(Date.now());
+      await fetch(`${SERVER}/session?run=${id}`, { method: 'POST', credentials: 'include' });
+      const response = await fetch(`${SERVER}/verify?run=${id}`, { credentials: 'include' });
+      const verification = await response.json();
+      if (!response.ok) throw new Error(`Fetch control failed (HTTP ${response.status})`);
+      setRun({ id, fetchStatus: response.status, fetchCookie: verification.cookie });
+    } catch (error) {
+      setError(error.message);
+    }
+  }
+
+  async function finish(loaded) {
+    try {
+      const response = await fetch(`${SERVER}/events?run=${run.id}`, { credentials: 'include' });
+      const event = await response.json();
+      if (event.imageStatus === undefined) throw new Error('Image request did not reach the fixture server');
+      setRun((current) => ({ ...current, loaded, ...event }));
+    } catch (error) {
+      setError(error.message);
+    }
+  }
+
+  useEffect(() => { start(); }, []);
+  const completed = run?.imageStatus !== undefined;
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator
-      >
-        <Text style={[styles.label, { marginTop: IMAGE_TOP }]}>
-          Response rendered as an SVG element
+    <View style={styles.screen}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f4f6f8" />
+      <View style={styles.content}>
+        <Text style={styles.eyebrow}>EXPO IMAGE / ANDROID</Text>
+        <Text style={styles.title}>Cookie sharing repro</Text>
+        <Text style={styles.versions}>Expo {dependencies.expo} · Image {dependencies['expo-image']}</Text>
+        <Text style={styles.subtitle}>One session cookie. Two HTTP clients.</Text>
+        <View style={styles.card}>
+          <Text style={styles.step}>1. React Native fetch</Text>
+          <Text style={[styles.result, styles.success]}>{run ? `HTTP ${run.fetchStatus} · Cookie received` : 'Setting session cookie…'}</Text>
+          <Text style={styles.code}>{run?.fetchCookie || 'Waiting for server'}</Text>
+        </View>
+        <View style={styles.card}>
+          <Text style={styles.step}>2. expo-image</Text>
+          <Text testID="image-result" style={[styles.result, completed && (run.loaded ? styles.success : styles.failure)]}>
+            {completed ? `HTTP ${run.imageStatus} · ${run.loaded ? 'Image loaded' : 'Image failed'}` : 'Requesting protected image…'}
+          </Text>
+          <Text style={styles.code}>Cookie: {completed ? run.imageCookie || '(none)' : 'waiting'}</Text>
+          <View style={styles.imageFrame}>
+            {run && <Image
+              key={run.id}
+              source={{ uri: `${SERVER}/protected.svg?run=${run.id}` }}
+              cachePolicy="none"
+              style={styles.image}
+              contentFit="contain"
+              onLoad={() => finish(true)}
+              onError={() => finish(false)}
+            />}
+            {completed && !run.loaded && <Text style={styles.placeholder}>401 Unauthorized</Text>}
+          </View>
+        </View>
+        <Text testID="repro-verdict" style={[styles.verdict, completed && (run.loaded ? styles.success : styles.failure)]}>
+          {error || (completed ? run.loaded ? 'PASS: cookie shared with image' : 'FAIL: image request omitted cookie' : 'Running…')}
         </Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator
-          style={styles.imageScroll}
-          contentContainerStyle={styles.imageScrollContent}
-        >
-          <Image
-            source={{ uri: imageUri }}
-            style={[styles.image, { height: IMAGE_HEIGHT, width: IMAGE_HEIGHT * (1400 / 220) }]}
-            contentFit="contain"
-          />
-        </ScrollView>
-        <Text style={styles.label}>Raw JSON response:</Text>
-        <Text style={styles.jsonText} selectable>
-          {loading ? 'Loading…' : error ? `Error: ${error}` : jsonRaw}
-        </Text>
-      </ScrollView>
-      <StatusBar style="auto" />
+        <Pressable accessibilityRole="button" accessibilityLabel="Run repro" style={styles.button} onPress={start} disabled={!completed && !error}>
+          <Text style={styles.buttonText}>Run repro</Text>
+        </Pressable>
+        <Text style={styles.note}>Cookie set by the server with HttpOnly; Path=/.
+          {'\n'}Image cache disabled. No manual Cookie header.</Text>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 32,
-    alignItems: 'flex-start',
-  },
-  imageScroll: {
-    marginBottom: 16,
-    alignSelf: 'flex-start',
-    width: '100%',
-  },
-  imageScrollContent: {
-    flexGrow: 0,
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start',
-  },
-  image: {
-    marginBottom: 0,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  jsonText: {
-    fontFamily: 'monospace',
-    fontSize: 12,
-    color: '#333',
-  },
+  screen: { flex: 1, backgroundColor: '#f4f6f8' },
+  content: { flex: 1, paddingHorizontal: 24, paddingTop: 48, gap: 16 },
+  eyebrow: { color: '#526174', fontWeight: '700', fontSize: 12, letterSpacing: 2 },
+  title: { color: '#172433', fontSize: 28, fontWeight: '700' },
+  versions: { color: '#526174', fontSize: 13, marginTop: -8 },
+  subtitle: { color: '#526174', fontSize: 15, marginBottom: 4 },
+  card: { padding: 18, borderRadius: 14, backgroundColor: '#fff', gap: 10 },
+  step: { color: '#172433', fontSize: 17, fontWeight: '700' },
+  result: { fontSize: 17, fontWeight: '600', color: '#526174' },
+  success: { color: '#087744' },
+  failure: { color: '#ba3035' },
+  code: { color: '#526174', fontFamily: 'monospace', fontSize: 12 },
+  imageFrame: { height: 128, backgroundColor: '#eef1f4', borderRadius: 8, justifyContent: 'center', alignItems: 'center' },
+  image: { width: '100%', height: '100%', position: 'absolute' },
+  placeholder: { color: '#8a4650', fontSize: 18 },
+  verdict: { fontSize: 16, fontWeight: '700', minHeight: 24 },
+  button: { backgroundColor: '#263e55', borderRadius: 10, padding: 15, alignItems: 'center' },
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  note: { color: '#647184', fontSize: 12, lineHeight: 19 },
 });
