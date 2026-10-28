@@ -13,7 +13,7 @@ Pins Expo 58.0.21, expo-image 58.0.18, React Native 0.88.1, and React 19.3.0. A 
 3. An `expo-image` request to the same origin must send the cookie to load a protected SVG. The server returns HTTP 401 if it is missing.
 4. The app displays the server-observed image cookie and HTTP status. Both the image cache and HTTP cache are disabled. A unique URL identifies each run. No image Cookie header is supplied by JavaScript.
 
-The patch restores the `CookieManager` bridge removed in [expo/expo#44431](https://github.com/expo/expo/pull/44431), while keeping `OkHttpClientProvider.createClient()` and its interceptors. It overrides the resulting client's cookie jar.
+The patch restores the `CookieManager` bridge removed in [expo/expo#44431](https://github.com/expo/expo/pull/44431). It connects React Native cookie containers to the shared cookie store while keeping other factory-provided cookie jars, interceptors, and client settings.
 
 ## Run the unpatched baseline
 

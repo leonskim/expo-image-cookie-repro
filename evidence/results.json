@@ -1,5 +1,5 @@
 {
-  "testedAt": "2026-10-28T21:52:16.748Z",
+  "testedAt": "2026-10-28T22:26:26.545Z",
   "device": {
     "platform": "android",
     "serial": "emulator-5554",
@@ -14,7 +14,7 @@
   },
   "appSourceUnchanged": true,
   "appSourceSHA256": "ac6fbd4533eeba98a51a6eb7afaa414d9710f3582d721ca8412876f9a6d71308",
-  "patchSHA256": "8789a672626832ab3fd8ad2679fe4cb7cb18a6fe9bdaa4280d37c85dff1f4dcd",
+  "patchSHA256": "64a7d39b84b7ecb56b06f3e6f7fb987a95af4b3ed261e9ad77ad857eed3a3d3d",
   "before": {
     "run": "1793224216484",
     "imageStatus": 401,
@@ -24,11 +24,11 @@
     "build": "BUILD SUCCESSFUL in 5m 32s"
   },
   "after": {
-    "run": "1793224274981",
+    "run": "1793226345638",
     "imageStatus": 200,
     "imageCookie": "demo_session=valid",
     "screenshot": "after.png",
-    "nativeSourceSHA256": "f90a1c15b1305ae07df38a944aaa09782625b0257bd0358dc652a377244faba9",
+    "nativeSourceSHA256": "bd2e7d719ef582384cf40d46ac43565592d2fa12f35ef39e61857d948bd6cbc3",
     "build": "BUILD SUCCESSFUL in 5s"
   },
   "fixtureTest": {
@@ -40,5 +40,13 @@
     "android-emulator-5554",
     "local-cookie-fixture",
     "argent-before-after-captures"
-  ]
+  ],
+  "nativeRegression": {
+    "tests": 70,
+    "failures": 0,
+    "errors": 0,
+    "baselineCookieTestsFailed": 2,
+    "packageChecksPassed": true,
+    "kotlinFormattingPassed": true
+  }
 }
